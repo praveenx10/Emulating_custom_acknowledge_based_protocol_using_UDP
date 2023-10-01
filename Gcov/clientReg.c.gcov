@@ -1,0 +1,228 @@
+        -:    0:Source:../src/clientReg.c
+        -:    1://include user defined headerfile
+        -:    2:#include </home/praveen/Downloads/newupdated/src updated/inc/client.h>
+        -:    3:
+        -:    4:
+        -:    5:/* addNode() function is for creating and adding newnode in linked  list" 
+        -:    6:	return type = structure pointer of type unode
+        -:    7:	parameter =  structure pointer of type unode and structure varible of type user
+        -:    8:	no. of parameter = 2 
+        -:    9:*/
+        -:   10:
+        8:   11:unode* addNode(unode * head,user value)
+        -:   12:{
+        -:   13:	//allocating memory for newnode
+        8:   14:	unode *newnode = (unode*)malloc(sizeof(unode));
+        -:   15:	
+        -:   16:	//storing value in node's data part
+        8:   17:	newnode->data=value;
+        -:   18:	//making its next null	
+        8:   19:	newnode->next =NULL;
+        -:   20:	
+        8:   21:	unode *temp=NULL;
+        -:   22:	
+        8:   23:	if(head==NULL)
+        -:   24:	{
+        1:   25:		newnode->next=NULL;
+        1:   26:		head=newnode;
+        -:   27:	}
+        -:   28:	else
+        -:   29:	{
+        7:   30:		temp=head;
+       28:   31:		while(temp->next!=NULL)
+        -:   32:		{
+       21:   33:			temp=temp->next;
+        -:   34:		}
+        7:   35:		temp->next=newnode;
+        7:   36:		newnode->next=NULL;	
+        -:   37:	}
+        -:   38:	
+        8:   39:	return head;
+        -:   40:	free(newnode);
+        -:   41:}//end_of_addNode()
+        -:   42:
+        -:   43:
+        -:   44:
+        -:   45:/* readfile() function is for reading data from a file named "user.txt using linked  list" 
+        -:   46:	return type = structure pointer of type unode
+        -:   47:	parameter = File pointer and structure pointer of type unode
+        -:   48:	no. of parameter = 2 
+        -:   49:*/
+        -:   50:	
+        1:   51:unode * readfile(FILE *fptr, unode *head)
+        -:   52:{
+        -:   53:	user value;
+        1:   54:	unode * newnode=NULL;
+        -:   55:	
+        -:   56:	// reading values from files using file pointer
+        9:   57:	while(fscanf(fptr,"%s %s %d",value.name,value.password,&value.id)!=-1)
+        -:   58:	{
+        -:   59:		//calling addNode() function
+        8:   60:		head=addNode(head,value); 
+        -:   61:		
+        -:   62:	}
+        1:   63:	return head;
+        -:   64:		
+        -:   65:}//end_of_readfile
+        -:   66:
+        -:   67:
+        -:   68:
+        -:   69:
+        -:   70:/* isPresent() function is for searching a data is present using auser id in a file named "user.txt" 
+        -:   71:	return type = integer
+        -:   72:	parameter = integer
+        -:   73:	no. of parameter = 1 
+        -:   74:*/
+        -:   75:	
+        1:   76:int isUserPresent(int id)
+        -:   77:{
+        1:   78:	unode *head=NULL;
+        1:   79:	unode * temp=head;
+        -:   80:	
+        -:   81:	//opening file in read mode
+        1:   82:	FILE *fptr=fopen("../data/user.txt","r");
+        -:   83:	
+        1:   84:	if(fptr!=NULL)
+        -:   85:	{
+        -:   86:		//calling readfile()
+        1:   87:		head = readfile(fptr,head);	
+        -:   88:	}
+        -:   89:	else
+        -:   90:	{
+    #####:   91:		error("Unable to Open File\n");		
+        -:   92:	}
+        1:   93:	temp=head;
+        1:   94:	while(temp != NULL)
+        -:   95:	{
+        -:   96:	
+        1:   97:		if(temp->data.id==id)	//checking id entered id matches id in linked list or not
+        -:   98:		{
+        1:   99:			return 0;
+        -:  100:		} else 
+        -:  101:		{
+        -:  102:		
+    #####:  103:			temp=temp->next;
+        -:  104:		}		
+        -:  105:		
+        -:  106:	}
+    #####:  107:	fclose(fptr);
+    #####:  108:	return 1;	
+        -:  109:}//end_of_isPresent()
+        -:  110:
+        -:  111:
+        -:  112:
+        -:  113:/* countnode() function is for storing data in linkedlist from a file named "valid.txt"  and counting the nodes
+        -:  114:	return type = integer
+        -:  115:	parameter = NULL
+        -:  116:	no. of parameter = 0
+        -:  117:*/
+        -:  118:
+    #####:  119:int countNode()
+        -:  120:{
+    #####:  121:	unode * head=NULL;
+    #####:  122:	unode * temp=head;
+    #####:  123:	int count=1000;
+        -:  124:	
+        -:  125:	//opening file in read mode
+    #####:  126:	FILE *fptr=fopen("../data/user.txt","r");
+        -:  127:	//checking if file pointer fptr is null or not
+    #####:  128:	if(fptr!=NULL)
+        -:  129:	{
+        -:  130:		//calling readfile() function
+    #####:  131:		head = readfile(fptr,head);
+        -:  132:	}
+        -:  133:	else
+        -:  134:	{
+    #####:  135:		error("Unable to Open File\n");		
+        -:  136:	}
+        -:  137:	
+    #####:  138:	temp=head;
+        -:  139:	
+    #####:  140:	if(head==NULL)
+        -:  141:	{
+    #####:  142:		return count;
+        -:  143:	}
+        -:  144:	else
+        -:  145:	{
+    #####:  146:		while(temp!=NULL)
+        -:  147:		{
+    #####:  148:			count++;
+    #####:  149:			temp=temp->next;
+        -:  150:		}
+    #####:  151:		return count;
+        -:  152:	}
+        -:  153:}//end_of_countNode()
+        -:  154:
+        -:  155:
+        -:  156:
+        -:  157:/* writefile() function is for taking userinput and storing those in a file named "user.txt"
+        -:  158:	return type = void
+        -:  159:	parameter = file pointer
+        -:  160:	no. of parameter = 1 
+        -:  161:*/
+    #####:  162:void writefile(FILE * fptr)
+        -:  163:{
+        -:  164:
+        -:  165:	user value;
+    #####:  166:	system("clear");	
+    #####:  167:	printf("-------------------------------------------\n");
+    #####:  168:	printf("-------------------------------------------\n");
+    #####:  169:	printf("\t    REGISTRATION WINDOW\n");
+    #####:  170:	printf("-------------------------------------------\n");
+    #####:  171:	printf("-------------------------------------------\n");
+        -:  172:	
+        -:  173:	//taking name and password from user for registration	
+    #####:  174:	printf("\nEnter name: ");
+    #####:  175:	scanf("%s", value.name);
+    #####:  176:	printf("\nEnter password: ");
+    #####:  177:	scanf("%s", value.password);
+        -:  178:	
+    #####:  179:	int id=countNode();	//calling countNode() function
+        -:  180:	
+    #####:  181:	value.id=++id;
+        -:  182:	
+    #####:  183:	fprintf(fptr,"%s\t\t%s\t\t%d\n",value.name,value.password,value.id);
+    #####:  184:	printf("\n\nYour user id is %d\n",id);
+    #####:  185:}//end_of_writefile()
+        -:  186:
+        -:  187:
+        -:  188:	
+        -:  189:/* userRegistration() function is for adding data
+        -:  190:	return type = void
+        -:  191:	parameter = null
+        -:  192:	no. of parameter = 0 
+        -:  193:*/
+    #####:  194:void registration()
+        -:  195:{
+        -:  196:	char choice;
+        -:  197:	//opening file in append mode
+    #####:  198:	FILE *fptr=fopen("../data/user.txt","a+");	
+    #####:  199:	if(fptr==NULL)
+        -:  200:	{
+    #####:  201:		error("unable to open file..\n");
+        -:  202:		
+        -:  203:	}//end_of_if
+        -:  204:	
+        -:  205:	do
+        -:  206:	{
+        -:  207:		//calling writefile()function
+    #####:  208:		writefile(fptr);
+    #####:  209:		printf("\n\n\nCONGRATULATIONS....!  You have successfully registered.\n\n\n");
+        -:  210:		
+        -:  211:		//asking user to give input for continue regitstration for another user if yes type 'y' otherwise 'n'	
+    #####:  212:		printf("Do you want to continue(y/n): ");
+    #####:  213:		scanf(" %c",&choice);
+    #####:  214:		if(choice=='n' || choice=='N')
+        -:  215:		{
+    #####:  216:			system("clear");
+    #####:  217:			getMenu();
+        -:  218:		}
+        -:  219:		
+    #####:  220:	}while((choice!='n' || choice!='N')&& (choice=='y' || choice=='Y'));	//end_of_dowhile
+        -:  221:	
+    #####:  222:	fclose(fptr);
+    #####:  223:}//end_of_registration()
+        -:  224:
+        -:  225:
+        -:  226:
+        -:  227:

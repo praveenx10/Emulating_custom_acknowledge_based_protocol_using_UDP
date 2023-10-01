@@ -1,0 +1,18 @@
+        -:    0:Source:../src/server.c
+        -:    1://including user define header file
+        -:    2:#include </home/praveen/Downloads/newupdated/src updated/inc/server.h>
+        -:    3:
+        -:    4:
+        -:    5:/*main method 
+        -:    6: return type = integer
+        -:    7: parameters = interger, array of character pointer*/
+        -:    8:
+        -:    9:// Main function
+        1:   10:int main(int argc, char *argv[])
+        -:   11:{
+        -:   12:
+        1:   13:	serverLogin();   //calling serverLogin() funtion
+    #####:   14:	return 0;
+        -:   15:}//end_of_main
+        -:   16:
+        -:   17:

@@ -1,0 +1,217 @@
+        -:    0:Source:../src/serverdef.c
+        -:    1:#include </home/praveen/Downloads/newupdated/src updated/inc/server.h>
+        -:    2:
+        -:    3:
+        -:    4:/*
+        -:    5:return type = void
+        -:    6:parameter passed = character pointer
+        -:    7:This function will print error
+        -:    8:*/	
+    #####:    9:void error(char *error_Message)
+        -:   10:{
+    #####:   11:	perror(error_Message);
+    #####:   12:	exit(EXIT_FAILURE);
+        -:   13:}//end_of_error()_function
+        -:   14:
+        -:   15:
+        -:   16:
+        -:   17:/*
+        -:   18:return type = void
+        -:   19:parameter passed = NULL
+        -:   20:This function will get server id and server password as user input and established handshake to receive data from client and display it
+        -:   21:*/		
+        1:   22:void serverLogin()
+        -:   23:{
+        -:   24:
+        -:   25:	int socketfd, serverLength,clientLength, sendValue,receiveValue, portNumber;
+        -:   26:	char serverId[SERVERIDSIZE], serverPassword[SERVERPASSWORDSIZE], buffer_One[BUFFERSIZE], buffer_Two[BUFFERSIZE];
+        -:   27:	
+        -:   28:	//pre-defined structures of type struct sockaddr_in which holds socket address
+        -:   29:	struct sockaddr_in server,client;
+        -:   30:	
+        -:   31:	//taking serverId 
+        1:   32:	printf("Enter Server ID: ");
+        1:   33:	scanf("%s",serverId);
+        -:   34:	//checking entered serverId id registered or not
+        1:   35:	if(strcmp(serverId,SERVERID)==0)
+        -:   36:	{
+        1:   37:		printf("Enter Server Password: ");	//taking server password from user
+        1:   38:		scanf("%s",serverPassword);
+        -:   39:		//checking entered serverId id registered or not
+        1:   40:		if(strcmp(serverPassword,SERVERPASSWORD)==0)
+        -:   41:		{
+        1:   42:			printf("Enter Port Number: ");		//taking port number from user whose range will be in between 49152 to 65535
+        1:   43:			scanf("%d",&portNumber);
+        1:   44:			if(portNumber < MIN || portNumber > MAX)
+        -:   45:			{
+    #####:   46:				error("Port number invalid");
+        -:   47:				
+        -:   48:			}
+        -:   49:			//Creating server socket 
+        1:   50:			socketfd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);	/* AF_INET = ipv4 internet protocol
+        -:   51:										 	 **SOCK_DGRAM = Supports datagrams (connectionless, unreliable messages of a fixed maximum length).
+        -:   52:										 	 ***IPPROTO_UDP = 0 and IPPROTO_UDP for UDP sockets	
+        -:   53:											*/
+        -:   54:			
+        -:   55:			//checking the socketFileDescriptor value if socket is created successfull it returns greater than 0 otherwise give message error in opening socket
+        1:   56:			if (socketfd < 0)
+        -:   57:			{
+    #####:   58:				error("Error in Opening socket");
+        -:   59:			}//end_of_if
+        -:   60:			else
+        -:   61:			{
+        1:   62:				printf("socket is successfully opened!!!\n");
+        -:   63:			}//end_of_else
+        -:   64:			
+        -:   65:			//getting size of server varible of type sockaddr_in structure
+        1:   66:			serverLength = sizeof(server);
+        -:   67:			
+        -:   68:			//bzero will make all the structure members to NULL
+        1:   69:			bzero(&server,serverLength);
+        -:   70:			
+        -:   71:			//providing ipv4 internet protocol
+        1:   72:			server.sin_family=AF_INET;
+        -:   73:			
+        -:   74:			//providing 0.0.0.0 as IP adderss so any client can join
+        1:   75:			server.sin_addr.s_addr=INADDR_ANY;
+        -:   76:			
+        -:   77:			//providing port number
+        1:   78:			server.sin_port=htons(portNumber);	/*atoi() = converts a character string to an integer value
+        -:   79:								 **htons() = converting host byte order to network byte order
+        -:   80:								*/ 
+        -:   81:			
+        -:   82:			
+        1:   83:			int bind_Value=bind(socketfd,(struct sockaddr *)&server,serverLength);   /*binding socket with address and port and storing returned value in bind variable
+        -:   84:													      **socketFileDescriptor = file descriptor contains return value of .*/
+        -:   85:													      
+        -:   86:			//checks if value of bind is greater than 0 or not if bind is positive binding is successful otherwise error in binding 		
+        -:   87:										   
+        1:   88:			if (bind_Value<0)
+        -:   89:			{
+    #####:   90:				error("Error in binding");
+        -:   91:			}//end_of_if
+        -:   92:			else
+        -:   93:			{
+        1:   94:				printf("binding successful!!!\n\n");
+        -:   95:			}//end_of_else
+        -:   96:			
+        -:   97:			
+        -:   98:			//getting size of client varible of type sockaddr_in structure
+        1:   99:			clientLength = sizeof(struct sockaddr_in);
+        -:  100:			
+        -:  101:			//calculating size of SYNACK and storing it into
+        1:  102:			int synackLength=sizeof(SYNACK);
+        -:  103:			
+        -:  104:			//receiving Synchronization message from client for connection and storing the return type in receive
+        1:  105:			receiveValue = recvfrom(socketfd,buffer_One,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&client,&clientLength);
+        -:  106:			
+        -:  107:			//checks if value of receiveValue is greater than 0 or not if receiveValue is positive message is received successfully otherwise error in receiving and handshake error
+        1:  108:			if(receiveValue<0)
+        -:  109:			{
+    #####:  110:				error("SYN not received!\nHANDSHAKE error!\n");
+        -:  111:			}//end_of_if
+        -:  112:			else
+        -:  113:			{
+        -:  114:				
+        1:  115:				printf("Handshake initiated!\n");
+        1:  116:				sleep(2);
+        1:  117:				printf("SYN received!\n");
+        1:  118:				bzero(buffer_One,sizeof(buffer_One)); //making the buffer empty or null
+        -:  119:				
+        -:  120:				//sending syn+ack as SYNACK to client and storing the return type in send
+        1:  121:				sendValue=sendto(socketfd,SYNACK,synackLength,MSG_WAITALL,(struct sockaddr *)&client,clientLength);
+        -:  122:					
+        -:  123:				//checks if value of send is greater than 0 or not if sendValue is positive message is sent successfully otherwise error in sending and handshake error
+        1:  124:				if(sendValue>0)
+        1:  125:				{	sleep(1);
+        1:  126:					printf("SYNACK sent successfully!\n");
+        -:  127:				}//end_of_if
+        -:  128:				else
+        -:  129:				{
+    #####:  130:					error("SYNACK not sent!\nHANDSHAKE error!\n");	
+        -:  131:				}//end_of_else
+        -:  132:
+        -:  133:			}//end_of_else	
+        -:  134:			
+        -:  135:			//receiving acknowledgement message from client and storing the return type in receiveValue
+        1:  136:			receiveValue=recvfrom(socketfd,buffer_One,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&client,&clientLength);
+        -:  137:			
+        -:  138:			//checks if value of receiveValue is greater than 0 or not if receive is positive message is received successfully otherwise error in receiving and handshake error
+        1:  139:			if(receiveValue<0)
+        -:  140:			{
+    #####:  141:				error("ACK not received!\nHANDSHAKE error!\n");
+        -:  142:			}//end_of_if
+        -:  143:			else
+        -:  144:			{
+        -:  145:				//comparing received string with ACK using strcmp, if it returns 0, handshake completes
+        1:  146:				if(strcmp(buffer_One,"ACK")==0)
+        -:  147:				{
+        1:  148:					sleep(2);
+        1:  149:					printf("ACK has received!\n");
+        1:  150:					printf("Handshake Completed!\n");
+        -:  151:				}//end_of_if
+        -:  152:			}//end_of_else
+        -:  153:			
+        -:  154:			while(1)
+        -:  155:			{
+        -:  156:			/*from line 148 to line 185, we are performing data received  from server side*/
+        -:  157:			
+        -:  158:			// receiving message from client 
+        3:  159:			receiveValue = recvfrom(socketfd,buffer_One,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&client,&clientLength); 
+        -:  160:			
+        -:  161:			//copying value of buffer_One into buffer_Two
+        3:  162:			strcpy(buffer_Two,buffer_One);
+        -:  163:			
+        3:  164:			if(receiveValue<0)
+        -:  165:			{
+    #####:  166:				error("Message has not received!\n");
+        -:  167:			}//end_of_if
+        -:  168:			else
+        -:  169:			{
+        -:  170:				//sending the received message back to server to get aknowledgement
+        3:  171:				sendValue=sendto(socketfd,buffer_One,strlen(buffer_One),MSG_WAITALL,(struct sockaddr *)&client,clientLength);
+        3:  172:				if(sendValue<0)
+        -:  173:				{
+    #####:  174:					error("Send failed\n");
+        -:  175:				}//end_of_if
+        -:  176:				
+        -:  177:			}//end_of_else
+        -:  178:				
+        3:  179:			receiveValue=recvfrom(socketfd,buffer_One,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&client,&clientLength);
+        -:  180:			//checks acknowledgement received from client or not
+        3:  181:			if(receiveValue<0)
+        -:  182:			{
+    #####:  183:				error("Acknowledgement has not received!\n");
+        -:  184:			}//end_of_if
+        -:  185:			else
+        -:  186:			{
+        -:  187:			
+        3:  188:				if(strcmp(buffer_One,ACK)==0)		
+        -:  189:				{
+        3:  190:					if(strcmp(buffer_Two,"goodbye")==0)
+        -:  191:					{
+        1:  192:						printf("%s\n",buffer_Two);
+        1:  193:						sendto(socketfd,"Bye\n",5,0,(struct sockaddr *)&client,clientLength);
+        1:  194:						exit(0);
+        -:  195:					}
+        -:  196:
+        2:  197:					printf("\n\n\nClient: %s\n",buffer_Two);		//printing message received from client
+        -:  198:				}//end_of_if
+        -:  199:				else
+        -:  200:				{
+    #####:  201:					printf("\n\n\nData not received");	
+        -:  202:				}//end_of_else	
+        -:  203:			}//end_of_else
+        -:  204:			}
+        -:  205:		}//end_of_if
+        -:  206:		else
+        -:  207:		{
+    #####:  208:				error("Wrong Password!\n");
+        -:  209:		}//end_of_else
+        -:  210:	}//end_of_if
+        -:  211:	else
+        -:  212:	{
+    #####:  213:		printf("Wrong Server ID!\n");
+        -:  214:	}//end_of_else
+    #####:  215:}//end_of_serverLogin()_function
+        -:  216:

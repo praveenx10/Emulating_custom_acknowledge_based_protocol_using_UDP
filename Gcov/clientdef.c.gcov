@@ -1,0 +1,236 @@
+        -:    0:Source:../src/clientdef.c
+        -:    1://including user defined header file
+        -:    2:#include </home/praveen/Downloads/newupdated/src updated/inc/client.h>
+        -:    3:
+        -:    4:
+        -:    5:/*login function first ask user input for validating regitered user with user id generated during registration after that it will ask port number from user
+        -:    6: then it requests the server for connection  if handshake done successfully, means connection is estabilished successfully and then data transfer can be done.
+        -:    7: login method 
+        -:    8: return type = integer
+        -:    9: parameters = null
+        -:   10:*/
+        -:   11:
+        1:   12:int clientLogin()
+        -:   13:{
+        -:   14:	//variable declaration
+        1:   15:	int userId=0,iterator=0, portNumber=0,socketfd=0, serverLength=0, sendValue=0, receiveValue=0;
+        -:   16:	
+        -:   17:	char message[BUFFERSIZE],buffer_One[BUFFERSIZE],buffer_Two[BUFFERSIZE];
+        -:   18:	
+        -:   19:	struct sockaddr_in server;
+        1:   20:	system("clear");
+        1:   21:	printf("-------------------------------------------\n");
+        1:   22:	printf("-------------------------------------------\n");
+        1:   23:	printf("\t     LOGIN WINDOW\n");
+        1:   24:	printf("-------------------------------------------\n");
+        1:   25:	printf("-------------------------------------------\n");
+        -:   26:	
+        -:   27:	//taking user id as user input
+        1:   28:	printf("=> Enter user id: ");
+        1:   29:	scanf("%d",&userId);
+        -:   30:	
+        -:   31:	//checking if user is registerd or not using registed user id
+        1:   32:	if(isUserPresent(userId)!=0)
+        -:   33:	{
+    #####:   34:		error("Id not registered!!\n");
+        -:   35:	}//end_of_if
+        -:   36:				
+        1:   37:	printf("=> Enter port number: ");	//taking port number from user with range 49152 to 65535
+        1:   38:	scanf("%d",&portNumber);
+        1:   39:	if(portNumber < MIN || portNumber > MAX)
+        -:   40:	{
+    #####:   41:		error("Invalid port number\n");
+        -:   42:	}//end_of_if
+        -:   43:	
+        -:   44:	//Creating socket for client
+        1:   45:	socketfd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);	/* AF_INET = ipv4 internet protocol
+        -:   46:								 **SOCK_DGRAM = Supports datagrams (connectionless, unreliable messages of a fixed maximum length).
+        -:   47:								 ***IPPROTO_UDP = 0 and IPPROTO_UDP for UDP sockets	
+        -:   48:								*/
+        -:   49:											 		
+        -:   50:	//checking the socketfd value if socket is created successfull it returns greater than 0 otherwise give message no such host
+        1:   51:	if(socketfd < 0)
+        -:   52:	{
+    #####:   53:		error("ERROR!!! no such host\n");
+        -:   54:		
+        -:   55:	}//end_of_if
+        -:   56:	
+        -:   57:	else
+        -:   58:	{
+        1:   59:		printf("socket is successfully opened\n\n");
+        -:   60:	}//end_of_else
+        -:   61:				
+        -:   62:	//providing ipv4 internet protocol
+        1:   63:	server.sin_family = AF_INET;
+        -:   64:				
+        -:   65:	//providing port number 
+        1:   66:	server.sin_port = htons(portNumber);	//htons() = converting host byte order to network byte order
+        -:   67:				
+        -:   68:	//INADDR_ANY = IP 0.0.0.0
+        1:   69:	server.sin_addr.s_addr=INADDR_ANY;
+        -:   70:
+        -:   71:	//getting size of the sockaddr_in structure
+        1:   72:	serverLength=sizeof(server);
+        -:   73:				
+        -:   74:	//bzero will make all the all the members of buffer to 0
+        1:   75:	bzero(buffer_One,BUFFERSIZE);
+        -:   76:				
+        -:   77:	//calculating size of SYN and storing it into	synLength		
+        1:   78:	int synLength=sizeof(SYN);
+        -:   79:	
+        -:   80:	//calculating size of ACK and storing it into ackLength
+        1:   81:	int ackLength=sizeof(ACK);
+        -:   82:			
+        1:   83:	sendValue=sendto(socketfd,SYN,synLength,MSG_WAITALL,(struct sockaddr *)&server,serverLength);
+        1:   84:	if(sendValue>0)
+        -:   85:	{
+        1:   86:		printf("Handshake initiated!\n");
+        1:   87:		sleep(1);
+        1:   88:		printf("Syn sent successfully!\n");
+        -:   89:	}//end_of_if
+        -:   90:	
+        -:   91:	else
+        -:   92:	{
+    #####:   93:		error("syn not sent successfully!\n Handshake error\n");
+        -:   94:	}//end_of_else
+        -:   95:	
+        -:   96:	//receiving acknowledgement message from server and storing the return type in receiveValue				
+        1:   97:	receiveValue=recvfrom(socketfd,buffer_One,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&server, &serverLength);
+        -:   98:		
+        -:   99:	//checks if value of receiveValue is greater than 0 or not if receive is positive message is received successfully otherwise error in receiving and handshake error
+        1:  100:	if(receiveValue>0)
+        -:  101:	{	
+        1:  102:		sleep(2);
+        1:  103:		printf("Synack received successfully!\n");
+        -:  104:		//setting the string to null					
+        1:  105:		bzero(buffer_One,sizeof(buffer_One));
+        -:  106:		//sending acknowledgement to server				
+        1:  107:		sendValue=sendto(socketfd,ACK,ackLength,MSG_WAITALL,(struct sockaddr *)&server,serverLength);
+        -:  108:		
+        1:  109:		if(sendValue>0)
+        -:  110:		{	
+        1:  111:			sleep(1);
+        1:  112:			printf("ack sent successfully!\n");
+        1:  113:			sleep(1);
+        1:  114:			printf("3-way Handshake Completed!\n\n\n");
+        -:  115:		}//end_of_if
+        -:  116:		
+        -:  117:		else
+        -:  118:		{
+    #####:  119:			error("ack not sent successfully!\n Handshake error\n");
+        -:  120:		}//end_of_else
+        -:  121:		
+        -:  122:	}//end_of_if
+        -:  123:	else
+        -:  124:	{
+    #####:  125:		error("synack not received successfully! Handshake error\n\n");
+        -:  126:	}//end_of_else
+        -:  127:	
+        -:  128:	
+        -:  129:	//starts message transfer from client to server
+        1:  130:	printf("\n\n\n-----------------------------------------------");
+        1:  131:	printf("\n-----------------------------------------------");
+        1:  132:	printf("\n\t    Data Transfer Starts\n");
+        1:  133:	printf("\n-----------------------------------------------");
+        1:  134:	printf("\n-----------------------------------------------\n");
+        -:  135:	
+        -:  136:	while(1)
+        -:  137:	{	
+        3:  138:	printf("Enter your message: " );
+        3:  139:	scanf("%s",message);
+        3:  140:	printf("\n");
+        -:  141:	
+        -:  142:	//setting buffer_Two string to null
+        3:  143:	bzero(buffer_Two,BUFFERSIZE);
+        -:  144:	
+        -:  145:	//sending message to server				
+        3:  146:	sendValue=sendto(socketfd,message,strlen(message),MSG_WAITALL,(struct sockaddr *)&server,serverLength);
+        3:  147:	if(sendValue<0)
+        -:  148:	{
+    #####:  149:		error("Unable to send message successfully!\n");			
+        -:  150:	}//end_of_if
+        -:  151:	
+        3:  152:	receiveValue=recvfrom(socketfd,buffer_Two,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&server, &serverLength);
+        3:  153:	if(receiveValue>0)
+        -:  154:	{	
+        5:  155:		for(iterator = 0; buffer_Two[iterator] != '\0' && message[iterator] != '\0'; iterator++)
+        -:  156:		{				
+        3:  157:			if(buffer_Two[iterator]!=message[iterator])	//checking send message to server and received message  from server
+        -:  158:			{
+    #####:  159:				break;
+        -:  160:			}//end_of_if
+        -:  161:
+        3:  162:			bzero(buffer_Two,sizeof(buffer_Two));
+        -:  163:			//sending aknowledgement to server that server has received correct message
+        3:  164:			sendValue=sendto(socketfd,ACK,ackLength,MSG_WAITALL,(struct sockaddr *)&server,serverLength);
+        3:  165:			if(sendValue<0)
+        -:  166:			{
+    #####:  167:				error("Acknowledgement has not sent successfully!\n");
+        -:  168:			}
+        -:  169:			else
+        -:  170:			{
+        3:  171:					if(strcmp(message,"goodbye")==0)
+        -:  172:					{
+        1:  173:					receiveValue=recvfrom(socketfd,buffer_Two,BUFFERSIZE,MSG_WAITALL,(struct sockaddr *)&server, &serverLength);
+        1:  174:					printf("%s",buffer_Two);
+        1:  175:					exit(0);
+        -:  176:					}
+        -:  177:			}//end_of_if			
+        -:  178:		}//end_of_for
+        -:  179:	}//end_of_if
+        -:  180:	else
+        -:  181:	{
+    #####:  182:		error("Not received successfully!\n");	
+        -:  183:	}
+        -:  184:	}						
+        -:  185:}//end_of_clientLogin()
+        -:  186:
+        -:  187:
+        -:  188:/*
+        -:  189:return type = void
+        -:  190:parameter passed = character pointer
+        -:  191:This function will print error
+        -:  192:*/
+        -:  193:
+    #####:  194:void error(char *error_Message)
+        -:  195:{
+    #####:  196:	perror(error_Message);
+    #####:  197:	exit(EXIT_FAILURE);
+        -:  198:}//end_of_error()
+        -:  199:
+        -:  200:/*
+        -:  201:return type = void
+        -:  202:parameter passed = null
+        -:  203:This function will print menu and take user input for choosing menu
+        -:  204:*/
+        -:  205:
+        1:  206:void getMenu()
+        -:  207:{
+        -:  208:	int num;
+        -:  209:	pthread_t thread1,thread2;		// declaring thread variables
+        1:  210:	printf("\n\n1.Registration");
+        1:  211:	printf("\n2.Login \n");
+        1:  212:	printf("\n3.Exit \n");
+        1:  213:	printf("\nENTER YOUR CHOICE: ");	//accepting choice from user
+        1:  214:	scanf("%d", &num);
+        -:  215:	
+        1:  216:		switch(num)
+        -:  217:		{
+    #####:  218:			case ONE:
+    #####:  219:				pthread_create(&thread1,NULL,(void*) &registration,NULL);
+    #####:  220:				pthread_join(thread1,NULL);	
+    #####:  221:				break;
+        -:  222:				
+        1:  223:			case TWO:
+        1:  224:				pthread_create(&thread2,NULL,(void*) &clientLogin,NULL);
+        1:  225:				pthread_join(thread2,NULL);	
+    #####:  226:				break;	
+        -:  227:				
+    #####:  228:			case 3:	
+    #####:  229:				exit(0);
+        -:  230:				
+    #####:  231:			default:
+    #####:  232:				printf("\nWrong choice!!!  choose again....\n\n\n");
+        -:  233:		}//end_of_switch
+    #####:  234:}//end_of_getMenu()_function
+        -:  235:

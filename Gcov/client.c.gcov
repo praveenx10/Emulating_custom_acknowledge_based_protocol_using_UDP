@@ -1,0 +1,21 @@
+        -:    0:Source:../src/client.c
+        -:    1:
+        -:    2://including user defined header file
+        -:    3:#include </home/praveen/Downloads/newupdated/src updated/inc/client.h>
+        -:    4:
+        -:    5:
+        -:    6:/*main method 
+        -:    7: return type = integer
+        -:    8: parameters = interger, array of character pointer*/
+        -:    9: 
+        1:   10:int main(int argc, char *argv[])
+        -:   11:{	
+        1:   12:	getMenu(); //calling getMenu() funtion
+    #####:   13:	return 0;
+        -:   14:}//end_of_main
+        -:   15:
+        -:   16:
+        -:   17:
+        -:   18:
+        -:   19:
+        -:   20:
